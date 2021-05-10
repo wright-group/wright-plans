@@ -1,0 +1,11 @@
+[build-system]
+requires = ["flit_core >=2,<4"]
+build-backend = "flit_core.buildapi"
+
+[tool.flit.metadata]
+module = "wright_plans"
+author = "Kyle Sunden"
+author-email = "contact@ksunden.space"
+home-page = "https://github.com/wright-group/bluesky-wright"
+classifiers = [ "License :: OSI Approved :: MIT License",]
+
