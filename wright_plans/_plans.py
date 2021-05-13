@@ -1,11 +1,28 @@
+__all__ = [
+        "make_one_nd_step",
+        "scan",
+        "rel_scan",
+        "list_scan",
+        "rel_list_scan",
+        "list_grid_scan",
+        "rel_list_grid_scan",
+        "log_scan",
+        "rel_log_scan",
+        "grid_scan",
+        "rel_grid_scan",
+        "scan_nd",
+        ]
+
 from graphlib import TopologicalSorter
 
 import bluesky.plan_stubs
+from bluesky import plans as bsp
+import toolz
 
 from ._constants import Constant
 from ._units import ureg, get_units
 
-def make_one_nd_step(constants=None, axis_units=None):
+def make_one_nd_step(constants=None, axis_units=None, per_step=None):
     """Generate a one_nd_step function for given metadata.
 
     The fields taken into account are:
@@ -13,12 +30,14 @@ def make_one_nd_step(constants=None, axis_units=None):
     `constants`: a map of motor names to tuple of (string units, list of (coeff: float, var: string))
     `motors` is a mapping of motor names to motor objects
     """
-    if constants is None and axis_units is None:
+    if per_step is None:
+        per_step = bluesky.plan_stubs.one_nd_step
+    if not constants and not axis_units:
         # Nothing special to do, just return original method
-        return bluesky.plan_stubs.one_nd_step
-    if constants is None:
+        return per_step
+    if not constants:
         constants = {}
-    if axis_units is None:
+    if not axis_units:
         axis_units = {}
 
     sorter = TopologicalSorter({})
@@ -43,6 +62,77 @@ def make_one_nd_step(constants=None, axis_units=None):
             const_mot_units = get_units(mot, const.units)
             step[mot] = const.evaluate(step, const_mot_units)
             
-        yield from bluesky.plan_stubs.one_nd_step(detectors, step, pos_cache)
+        yield from per_step(detectors, step, pos_cache)
 
     return one_nd_step
+
+def _axis_units_from_args(args, n):
+    return {m:u for m,*_,u in toolz.partition(n, args) if u}
+
+def scan(detectors, *args, num=None, constants=None, per_step=None, md=None):
+    nargs = 4
+    axis_units = _axis_units_from_args(args, nargs)
+    per_step = make_one_nd_step(constants, axis_units, per_step)
+    args = [x for i,x in enumerate(args) if not i%nargs == nargs-1]
+    yield from bsp.scan(detectors, *args, num=num, per_step=per_step, md=md)
+
+def rel_scan(detectors, *args, num=None, constants=None, per_step=None, md=None):
+    nargs = 4
+    axis_units = _axis_units_from_args(args, nargs)
+    per_step = make_one_nd_step(constants, axis_units, per_step)
+    args = [x for i,x in enumerate(args) if not i%nargs == nargs-1]
+    yield from bsp.rel_scan(detectors, *args, num=num, per_step=per_step, md=md)
+
+def list_scan(detectors, *args, constants=None, per_step=None, md=None):
+    nargs=3
+    axis_units = _axis_units_from_args(args, nargs)
+    per_step = make_one_nd_step(constants, axis_units, per_step)
+    args = [x for i,x in enumerate(args) if not i%nargs == nargs-1]
+    yield from bsp.list_scan(detectors, *args, per_step=per_step, md=md)
+
+def rel_list_scan(detectors, *args, constants=None, per_step=None, md=None):
+    nargs=3
+    axis_units = _axis_units_from_args(args, nargs)
+    per_step = make_one_nd_step(constants, axis_units, per_step)
+    args = [x for i,x in enumerate(args) if not i%nargs == nargs-1]
+    yield from bsp.rel_list_scan(detectors, *args, per_step=per_step, md=md)
+
+def list_grid_scan(detectors, *args, constants=None, snake_axes=False, per_step=None, md=None):
+    nargs=3
+    axis_units = _axis_units_from_args(args, nargs)
+    per_step = make_one_nd_step(constants, axis_units, per_step)
+    args = [x for i,x in enumerate(args) if not i%nargs == nargs-1]
+    yield from bsp.list_grid_scan(detectors, *args, snake_axes=snake_axes, per_step=per_step, md=md)
+
+def rel_list_grid_scan(detectors, *args, constants=None, snake_axes=False, per_step=None, md=None):
+    nargs=3
+    axis_units = _axis_units_from_args(args, nargs)
+    per_step = make_one_nd_step(constants, axis_units, per_step)
+    args = [x for i,x in enumerate(args) if not i%nargs == nargs-1]
+    yield from bsp.rel_list_grid_scan(detectors, *args, snake_axes=snake_axes, per_step=per_step, md=md)
+
+def log_scan(detectors, motor, start, stop, num, units=None, *, constants=None, per_step=None, md=None):
+    per_step = make_one_nd_step(constants, {motor: units}, per_step)
+    yield from bsp.log_scan(detectors, motor, start, stop, num, per_step=per_step, md=md)
+
+def rel_log_scan(detectors, motor, start, stop, num, units=None, *, constants=None, per_step=None, md=None):
+    per_step = make_one_nd_step(constants, {motor: units}, per_step)
+    yield from bsp.rel_log_scan(detectors, motor, start, stop, num, per_step=per_step, md=md)
+
+def grid_scan(detectors, *args, constants=None, snake_axes=False, per_step=None, md=None):
+    nargs=5
+    axis_units = _axis_units_from_args(args, nargs)
+    per_step = make_one_nd_step(constants, axis_units, per_step)
+    args = [x for i,x in enumerate(args) if not i%nargs == nargs-1]
+    yield from bsp.grid_scan(detectors, *args, snake_axes=snake_axes, per_step=per_step, md=md)
+
+def rel_grid_scan(detectors, *args, constants=None, snake_axes=False, per_step=None, md=None):
+    nargs=5
+    axis_units = _axis_units_from_args(args, nargs)
+    per_step = make_one_nd_step(constants, axis_units, per_step)
+    args = [x for i,x in enumerate(args) if not i%nargs == nargs-1]
+    yield from bsp.rel_grid_scan(detectors, *args, snake_axes=snake_axes, per_step=per_step, md=md)
+
+def scan_nd(detectors, cycler, *, axis_units=None, constants=None, per_step=None, md=None):
+    per_step = make_one_nd_step(constants, axis_units, per_step)
+    yield from bsp.scan_nd(detectors, cycler, per_step=per_step, md=md)

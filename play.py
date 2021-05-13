@@ -21,7 +21,7 @@ RE = bluesky.RunEngine({})
 RE.subscribe(bec)
 
 md={"constants":{d2: Constant("mm", [ConstantTerm(2, d1), ConstantTerm(0.5, None)]), d0:Constant("cm", [ConstantTerm(10, d2), ConstantTerm(1, None)])}, "axis_units":{d1: "mm"}}
-RE(bsp.grid_scan([daq], d1, 0, 10, 5,
-    snake_axes=True,
-    per_step = wright_plans.make_one_nd_step(**md)))
+RE(wright_plans.grid_scan([daq], d1, 0, 10, 5, "mm",
+    constants=md["constants"],
+    ))
 
