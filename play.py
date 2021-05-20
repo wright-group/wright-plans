@@ -8,6 +8,15 @@ from bluesky.callbacks.best_effort import BestEffortCallback
 
 from wright_plans._constants import Constant, ConstantTerm
 
+from wright_plans.attune import motortune
+from wright_plans._messages import register_set_except
+
+
+from bluesky_autonomic import OPADevice
+
+import databroker
+cat = databroker.catalog["mongo"]
+
 
 bec = BestEffortCallback()
 
@@ -16,12 +25,13 @@ d2 = yaqc_bluesky.Device(38402)
 d0 = yaqc_bluesky.Device(38500)
 wm = yaqc_bluesky.Device(39876)
 daq = yaqc_bluesky.Device(38999)
+opa = OPADevice(yaqc_bluesky.Device(39301))
 
 RE = bluesky.RunEngine({})
 RE.subscribe(bec)
+RE.subscribe(cat.v1.insert)
+register_set_except(RE)
 
-md={"constants":{d2: Constant("mm", [ConstantTerm(2, d1), ConstantTerm(0.5, None)]), d0:Constant("cm", [ConstantTerm(10, d2), ConstantTerm(1, None)])}, "axis_units":{d1: "mm"}}
-RE(wright_plans.grid_scan([daq], d1, 0, 10, 5, "mm",
-    constants=md["constants"],
+RE(motortune([daq], opa, True, {"crystal_1": {"method": "scan", "center": 0, "width": 1, "npts": 3}, "crystal_2": {"method": "static", "center": 0.1, "width": 0.3, "npts": 2}}, {"device": wm, "method": "scan", "center": 1300, "width": 500, "npts": 10}
     ))
 

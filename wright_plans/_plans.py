@@ -6,8 +6,6 @@ __all__ = [
         "rel_list_scan",
         "list_grid_scan",
         "rel_list_grid_scan",
-        "log_scan",
-        "rel_log_scan",
         "grid_scan",
         "rel_grid_scan",
         "scan_nd",
@@ -51,7 +49,9 @@ def make_one_nd_step(constants=None, axis_units=None, per_step=None):
         # Translate axes from scan units to native units
         for mot, units in axis_units.items():
             mot_units = get_units(mot, units)
-            quantity = ureg.Quantity(step[mot], units).to(mot_units)
+            quantity = ureg.Quantity(step[mot], units)
+            if mot_units:
+                quantity = quantity.to(mot_units)
             step[mot] = quantity.magnitude
 
         # fill out constants in topological order, ignore "", do math in constant's units
@@ -111,14 +111,6 @@ def rel_list_grid_scan(detectors, *args, constants=None, snake_axes=False, per_s
     args = [x for i,x in enumerate(args) if not i%nargs == nargs-1]
     yield from bsp.rel_list_grid_scan(detectors, *args, snake_axes=snake_axes, per_step=per_step, md=md)
 
-def log_scan(detectors, motor, start, stop, num, units=None, *, constants=None, per_step=None, md=None):
-    per_step = make_one_nd_step(constants, {motor: units}, per_step)
-    yield from bsp.log_scan(detectors, motor, start, stop, num, per_step=per_step, md=md)
-
-def rel_log_scan(detectors, motor, start, stop, num, units=None, *, constants=None, per_step=None, md=None):
-    per_step = make_one_nd_step(constants, {motor: units}, per_step)
-    yield from bsp.rel_log_scan(detectors, motor, start, stop, num, per_step=per_step, md=md)
-
 def grid_scan(detectors, *args, constants=None, snake_axes=False, per_step=None, md=None):
     nargs=5
     axis_units = _axis_units_from_args(args, nargs)
@@ -136,3 +128,6 @@ def rel_grid_scan(detectors, *args, constants=None, snake_axes=False, per_step=N
 def scan_nd(detectors, cycler, *, axis_units=None, constants=None, per_step=None, md=None):
     per_step = make_one_nd_step(constants, axis_units, per_step)
     yield from bsp.scan_nd(detectors, cycler, per_step=per_step, md=md)
+
+
+
