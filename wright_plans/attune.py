@@ -95,15 +95,15 @@ def get_tune_points(instrument, arrangement, scanned_motors):
     return unique[diff > tol]
 
 def run_holistic(detectors, opa, motor0, motor1, width, npts, spectrometer, *, md=None):
-    return (yield from motortune(detectors+[motor0], opa, True, {motor1: {"method": "scan", "width": width, "npts": npts}}, spectrometer), md=md)
+    return (yield from motortune(detectors+[motor0], opa, True, {motor1: {"method": "scan", "width": width, "npts": npts}}, spectrometer, md=md))
 
 def run_intensity(detectors, opa, motor, width, npts, spectrometer, *, md=None):
     assert not spectrometer or spectrometer["method"] in ("none", "track", "zero")
-    return (yield from motortune(detectors, opa, True, {motor: {"method": "scan", "width": width, "npts": npts}}, spectrometer), md=md)
+    return (yield from motortune(detectors, opa, True, {motor: {"method": "scan", "width": width, "npts": npts}}, spectrometer, md=md))
 
 
 def run_setpoint(detectors, opa, motor, width, npts, spectrometer, *, md=None):
-    return (yield from motortune(detectors, opa, True, {motor: {"method": "scan", "width": width, "npts": npts}}, spectrometer), md=md)
+    return (yield from motortune(detectors, opa, True, {motor: {"method": "scan", "width": width, "npts": npts}}, spectrometer, md=md))
 
-def run_tune_test(detectors, opa, spectrometer, *, md=None)
-    return (yield from motortune(detectors, opa, True, {}, spectrometer), md=md)
+def run_tune_test(detectors, opa, spectrometer, *, md=None):
+    return (yield from motortune(detectors, opa, True, {}, spectrometer, md=md))
