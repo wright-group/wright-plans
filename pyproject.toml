@@ -8,4 +8,6 @@ author = "Kyle Sunden"
 author-email = "contact@ksunden.space"
 home-page = "https://github.com/wright-group/bluesky-wright"
 classifiers = [ "License :: OSI Approved :: MIT License",]
-
+requires = ["bluesky", "pint", "toolz"]
+[tool.flit.metadata.requires-extra]
+attune = ["attune", "numpy", "cycler"]
