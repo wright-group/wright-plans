@@ -42,7 +42,7 @@ def make_one_nd_step(constants=None, axis_units=None, per_step=None):
         constants = {mot: Constant(units, [ConstantTerm(coeff, var) for coeff, var in terms]) for mot, units, terms in constants}
 
     sorter = TopologicalSorter({})
-    for var, const in constants:
+    for var, const in constants.items():
         sorter.add(var, *[x.var for x in const.terms])
 
     order = [*sorter.static_order()]
