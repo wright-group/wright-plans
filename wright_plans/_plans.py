@@ -39,7 +39,7 @@ def make_one_nd_step(constants=None, axis_units=None, per_step=None):
         axis_units = {}
 
     if isinstance(constants, list):
-        constants = {mot: Constant(units, [ConstantTerm(coeff, var) for coef, var in terms]) for mot, units, terms in constants}
+        constants = {mot: Constant(units, [ConstantTerm(coeff, var) for coeff, var in terms]) for mot, units, terms in constants}
 
     sorter = TopologicalSorter({})
     for var, const in constants:
