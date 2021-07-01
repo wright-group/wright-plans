@@ -17,7 +17,7 @@ import bluesky.plan_stubs
 from bluesky import plans as bsp
 import toolz
 
-from ._constants import Constant
+from ._constants import Constant, ConstantTerm
 from ._units import ureg, get_units
 
 def make_one_nd_step(constants=None, axis_units=None, per_step=None):
