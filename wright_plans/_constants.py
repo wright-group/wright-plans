@@ -1,6 +1,6 @@
 from typing import Optional, List
 
-from bluesky.abc import Readable, Movable
+from bluesky.protocols import Readable, Movable
 #from pydantic import BaseModel
 from dataclasses import dataclass
 
