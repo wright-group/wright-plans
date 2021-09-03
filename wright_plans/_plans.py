@@ -74,14 +74,20 @@ def make_one_nd_step(constants=None, axis_units=None, per_step=None):
 
     return one_nd_step
 
+
 def _md_constants(constants):
     if isinstance(constants, list):
         constants = {
             mot: Constant(units, [ConstantTerm(coeff, var) for coeff, var in terms])
             for mot, units, terms in constants
         }
-    return {k.name: [v.units, [[t.coeff, t.var.name] for t in v.terms]] for k, v in constants.items()}
-
+    return {
+        k.name: [
+            v.units,
+            [[t.coeff, None if t.var is None else t.var.name] for t in v.terms],
+        ]
+        for k, v in constants.items()
+    }
 
 
 def _axis_units_from_args(args, n):
