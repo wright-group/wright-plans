@@ -240,6 +240,7 @@ def grid_scan(
         "plan_axis_units": {k.name: v for k, v in axis_units.items()},
     }
     _md.update(md or {})
+    print(_md)
     per_step = make_one_nd_step(constants, axis_units, per_step)
     args = [x for i, x in enumerate(args) if not i % nargs == nargs - 1]
     yield from bsp.grid_scan(
