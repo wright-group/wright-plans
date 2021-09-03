@@ -74,6 +74,15 @@ def make_one_nd_step(constants=None, axis_units=None, per_step=None):
 
     return one_nd_step
 
+def _md_constants(constants):
+    if isinstance(constants, list):
+        constants = {
+            mot: Constant(units, [ConstantTerm(coeff, var) for coeff, var in terms])
+            for mot, units, terms in constants
+        }
+    return {k.name: [v.units, [[t.coeff, t.var] for t in v]] for k, v in constants.items()}
+
+
 
 def _axis_units_from_args(args, n):
     return {m: u for m, *_, u in toolz.partition(n, args) if u}
@@ -88,10 +97,10 @@ def scan(detectors, *args, num=None, constants=None, per_step=None, md=None):
         "plan_args": {
             "detectors": list(map(repr, detectors)),
             "args": md_args,
-            "constants": constants,
+            "constants": _md_constants(constants),
             "per_step": repr(per_step),
         },
-        "plan_constants": constants,
+        "plan_constants": _md_constants(constants),
         "plan_axis_units": {k.name: v for k, v in axis_units.items()},
     }
     _md.update(md or {})
@@ -109,10 +118,10 @@ def rel_scan(detectors, *args, num=None, constants=None, per_step=None, md=None)
         "plan_args": {
             "detectors": list(map(repr, detectors)),
             "args": md_args,
-            "constants": constants,
+            "constants": _md_constants(constants),
             "per_step": repr(per_step),
         },
-        "plan_constants": constants,
+        "plan_constants": _md_constants(constants),
         "plan_axis_units": {k.name: v for k, v in axis_units.items()},
     }
     _md.update(md or {})
@@ -130,10 +139,10 @@ def list_scan(detectors, *args, constants=None, per_step=None, md=None):
         "plan_args": {
             "detectors": list(map(repr, detectors)),
             "args": md_args,
-            "constants": constants,
+            "constants": _md_constants(constants),
             "per_step": repr(per_step),
         },
-        "plan_constants": constants,
+        "plan_constants": _md_constants(constants),
         "plan_axis_units": {k.name: v for k, v in axis_units.items()},
     }
     _md.update(md or {})
@@ -151,10 +160,10 @@ def rel_list_scan(detectors, *args, constants=None, per_step=None, md=None):
         "plan_args": {
             "detectors": list(map(repr, detectors)),
             "args": md_args,
-            "constants": constants,
+            "constants": _md_constants(constants),
             "per_step": repr(per_step),
         },
-        "plan_constants": constants,
+        "plan_constants": _md_constants(constants),
         "plan_axis_units": {k.name: v for k, v in axis_units.items()},
     }
     _md.update(md or {})
@@ -174,10 +183,10 @@ def list_grid_scan(
         "plan_args": {
             "detectors": list(map(repr, detectors)),
             "args": md_args,
-            "constants": constants,
+            "constants": _md_constants(constants),
             "per_step": repr(per_step),
         },
-        "plan_constants": constants,
+        "plan_constants": _md_constants(constants),
         "plan_axis_units": {k.name: v for k, v in axis_units.items()},
     }
     _md.update(md or {})
@@ -199,10 +208,10 @@ def rel_list_grid_scan(
         "plan_args": {
             "detectors": list(map(repr, detectors)),
             "args": md_args,
-            "constants": constants,
+            "constants": _md_constants(constants),
             "per_step": repr(per_step),
         },
-        "plan_constants": constants,
+        "plan_constants": _md_constants(constants),
         "plan_axis_units": {k.name: v for k, v in axis_units.items()},
     }
     _md.update(md or {})
@@ -224,10 +233,10 @@ def grid_scan(
         "plan_args": {
             "detectors": list(map(repr, detectors)),
             "args": md_args,
-            "constants": constants,
+            "constants": _md_constants(constants),
             "per_step": repr(per_step),
         },
-        "plan_constants": constants,
+        "plan_constants": _md_constants(constants),
         "plan_axis_units": {k.name: v for k, v in axis_units.items()},
     }
     _md.update(md or {})
@@ -249,10 +258,10 @@ def rel_grid_scan(
         "plan_args": {
             "detectors": list(map(repr, detectors)),
             "args": md_args,
-            "constants": constants,
+            "constants": _md_constants(constants),
             "per_step": repr(per_step),
         },
-        "plan_constants": constants,
+        "plan_constants": _md_constants(constants),
         "plan_axis_units": {k.name: v for k, v in axis_units.items()},
     }
     _md.update(md or {})
@@ -272,10 +281,10 @@ def scan_nd(
             "detectors": list(map(repr, detectors)),
             "cycler": repr(cycler),
             "axis_units": {k.name: v for k, v in axis_units.items()},
-            "constants": constants,
+            "constants": _md_constants(constants),
             "per_step": repr(per_step),
         },
-        "plan_constants": constants,
+        "plan_constants": _md_constants(constants),
         "plan_axis_units": {k.name: v for k, v in axis_units.items()},
     }
     _md.update(md or {})
