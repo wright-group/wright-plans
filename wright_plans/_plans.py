@@ -15,6 +15,7 @@ from graphlib import TopologicalSorter
 
 import bluesky.plan_stubs
 from bluesky import plans as bsp
+from bluesky.protocols import Movable
 import toolz
 
 from ._constants import Constant, ConstantTerm
@@ -75,62 +76,180 @@ def _axis_units_from_args(args, n):
 def scan(detectors, *args, num=None, constants=None, per_step=None, md=None):
     nargs = 4
     axis_units = _axis_units_from_args(args, nargs)
+    md_args = [repr(i) if isinstance(i, Movable) else i for i in args]
+    _md = {
+        "plan_name": "scan",
+        "plan_args": {
+            "detectors": list(map(repr, detectors)),
+            "args": md_args,
+            "plan_axis_units": axis_units,
+            "constants": constants,
+            "per_step": repr(per_step),
+        }
+        "plan_constants": constants
+        "plan_axis_units": axis_units
+    }
+    _md.update(md or {})
     per_step = make_one_nd_step(constants, axis_units, per_step)
     args = [x for i,x in enumerate(args) if not i%nargs == nargs-1]
-    yield from bsp.scan(detectors, *args, num=num, per_step=per_step, md=md)
+    yield from bsp.scan(detectors, *args, num=num, per_step=per_step, md=_md)
 
 def rel_scan(detectors, *args, num=None, constants=None, per_step=None, md=None):
     nargs = 4
     axis_units = _axis_units_from_args(args, nargs)
+    md_args = [repr(i) if isinstance(i, Movable) else i for i in args]
+    _md = {
+        "plan_name": "rel_scan",
+        "plan_args": {
+            "detectors": list(map(repr, detectors)),
+            "args": md_args,
+            "constants": constants,
+            "per_step": repr(per_step),
+        }
+        "plan_constants": constants
+        "plan_axis_units": axis_units
+    }
+    _md.update(md or {})
     per_step = make_one_nd_step(constants, axis_units, per_step)
     args = [x for i,x in enumerate(args) if not i%nargs == nargs-1]
-    yield from bsp.rel_scan(detectors, *args, num=num, per_step=per_step, md=md)
+    yield from bsp.rel_scan(detectors, *args, num=num, per_step=per_step, md=_md)
 
 def list_scan(detectors, *args, constants=None, per_step=None, md=None):
     nargs=3
     axis_units = _axis_units_from_args(args, nargs)
+    md_args = [repr(i) if isinstance(i, Movable) else i for i in args]
+    _md = {
+        "plan_name": "list_scan",
+        "plan_args": {
+            "detectors": list(map(repr, detectors)),
+            "args": md_args,
+            "constants": constants,
+            "per_step": repr(per_step),
+        }
+        "plan_constants": constants
+        "plan_axis_units": axis_units
+    }
+    _md.update(md or {})
     per_step = make_one_nd_step(constants, axis_units, per_step)
     args = [x for i,x in enumerate(args) if not i%nargs == nargs-1]
-    yield from bsp.list_scan(detectors, *args, per_step=per_step, md=md)
+    yield from bsp.list_scan(detectors, *args, per_step=per_step, md=_md)
 
 def rel_list_scan(detectors, *args, constants=None, per_step=None, md=None):
     nargs=3
     axis_units = _axis_units_from_args(args, nargs)
+    md_args = [repr(i) if isinstance(i, Movable) else i for i in args]
+    _md = {
+        "plan_name": "rel_list_scan",
+        "plan_args": {
+            "detectors": list(map(repr, detectors)),
+            "args": md_args,
+            "constants": constants,
+            "per_step": repr(per_step),
+        }
+        "plan_constants": constants
+        "plan_axis_units": axis_units
+    }
+    _md.update(md or {})
     per_step = make_one_nd_step(constants, axis_units, per_step)
     args = [x for i,x in enumerate(args) if not i%nargs == nargs-1]
-    yield from bsp.rel_list_scan(detectors, *args, per_step=per_step, md=md)
+    yield from bsp.rel_list_scan(detectors, *args, per_step=per_step, md=_md)
 
 def list_grid_scan(detectors, *args, constants=None, snake_axes=False, per_step=None, md=None):
     nargs=3
     axis_units = _axis_units_from_args(args, nargs)
+    md_args = [repr(i) if isinstance(i, Movable) else i for i in args]
+    _md = {
+        "plan_name": "list_grid_scan",
+        "plan_args": {
+            "detectors": list(map(repr, detectors)),
+            "args": md_args,
+            "constants": constants,
+            "per_step": repr(per_step),
+        }
+        "plan_constants": constants
+        "plan_axis_units": axis_units
+    }
+    _md.update(md or {})
     per_step = make_one_nd_step(constants, axis_units, per_step)
     args = [x for i,x in enumerate(args) if not i%nargs == nargs-1]
-    yield from bsp.list_grid_scan(detectors, *args, snake_axes=snake_axes, per_step=per_step, md=md)
+    yield from bsp.list_grid_scan(detectors, *args, snake_axes=snake_axes, per_step=per_step, md=_md)
 
 def rel_list_grid_scan(detectors, *args, constants=None, snake_axes=False, per_step=None, md=None):
     nargs=3
     axis_units = _axis_units_from_args(args, nargs)
+    md_args = [repr(i) if isinstance(i, Movable) else i for i in args]
+    _md = {
+        "plan_name": "rel_list_grid_scan",
+        "plan_args": {
+            "detectors": list(map(repr, detectors)),
+            "args": md_args,
+            "constants": constants,
+            "per_step": repr(per_step),
+        }
+        "plan_constants": constants
+        "plan_axis_units": axis_units
+    }
+    _md.update(md or {})
     per_step = make_one_nd_step(constants, axis_units, per_step)
     args = [x for i,x in enumerate(args) if not i%nargs == nargs-1]
-    yield from bsp.rel_list_grid_scan(detectors, *args, snake_axes=snake_axes, per_step=per_step, md=md)
+    yield from bsp.rel_list_grid_scan(detectors, *args, snake_axes=snake_axes, per_step=per_step, md=_md)
 
 def grid_scan(detectors, *args, constants=None, snake_axes=False, per_step=None, md=None):
     nargs=5
     axis_units = _axis_units_from_args(args, nargs)
+    md_args = [repr(i) if isinstance(i, Movable) else i for i in args]
+    _md = {
+        "plan_name": "grid_scan",
+        "plan_args": {
+            "detectors": list(map(repr, detectors)),
+            "args": md_args,
+            "constants": constants,
+            "per_step": repr(per_step),
+        }
+        "plan_constants": constants
+        "plan_axis_units": axis_units
+    }
+    _md.update(md or {})
     per_step = make_one_nd_step(constants, axis_units, per_step)
     args = [x for i,x in enumerate(args) if not i%nargs == nargs-1]
-    yield from bsp.grid_scan(detectors, *args, snake_axes=snake_axes, per_step=per_step, md=md)
+    yield from bsp.grid_scan(detectors, *args, snake_axes=snake_axes, per_step=per_step, md=_md)
 
 def rel_grid_scan(detectors, *args, constants=None, snake_axes=False, per_step=None, md=None):
     nargs=5
     axis_units = _axis_units_from_args(args, nargs)
+    md_args = [repr(i) if isinstance(i, Movable) else i for i in args]
+    _md = {
+        "plan_name": "rel_grid_scan",
+        "plan_args": {
+            "detectors": list(map(repr, detectors)),
+            "args": md_args,
+            "constants": constants,
+            "per_step": repr(per_step),
+        }
+        "plan_constants": constants
+        "plan_axis_units": axis_units
+    }
+    _md.update(md or {})
     per_step = make_one_nd_step(constants, axis_units, per_step)
     args = [x for i,x in enumerate(args) if not i%nargs == nargs-1]
-    yield from bsp.rel_grid_scan(detectors, *args, snake_axes=snake_axes, per_step=per_step, md=md)
+    yield from bsp.rel_grid_scan(detectors, *args, snake_axes=snake_axes, per_step=per_step, md=_md)
 
 def scan_nd(detectors, cycler, *, axis_units=None, constants=None, per_step=None, md=None):
+    _md = {
+        "plan_name": "scan_nd",
+        "plan_args": {
+            "detectors": list(map(repr, detectors)),
+            "cycler": repr(cycler),
+            "axis_units": axis_units,
+            "constants": constants,
+            "per_step": repr(per_step),
+        }
+        "plan_constants": constants
+        "plan_axis_units": axis_units
+    }
+    _md.update(md or {})
     per_step = make_one_nd_step(constants, axis_units, per_step)
-    yield from bsp.scan_nd(detectors, cycler, per_step=per_step, md=md)
+    yield from bsp.scan_nd(detectors, cycler, per_step=per_step, md=_md)
 
 
 
