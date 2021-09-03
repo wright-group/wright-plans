@@ -80,7 +80,7 @@ def _md_constants(constants):
             mot: Constant(units, [ConstantTerm(coeff, var) for coeff, var in terms])
             for mot, units, terms in constants
         }
-    return {k.name: [v.units, [[t.coeff, t.var] for t in v]] for k, v in constants.items()}
+    return {k.name: [v.units, [[t.coeff, t.var] for t in v.terms]] for k, v in constants.items()}
 
 
 
