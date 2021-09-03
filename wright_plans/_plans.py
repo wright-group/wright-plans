@@ -219,7 +219,7 @@ def grid_scan(
 ):
     nargs = 5
     axis_units = _axis_units_from_args(args, nargs)
-    md_args = [repr(i) if isinstance(i, Movable) else i for i in args]
+    md_args = [repr(i) if not isinstance(i, (int, float, str, bytes)) else i for i in args]
     _md = {
         "plan_name": "grid_scan",
         "plan_args": {
@@ -232,6 +232,7 @@ def grid_scan(
         "plan_axis_units": axis_units,
     }
     _md.update(md or {})
+    print(_md)
     per_step = make_one_nd_step(constants, axis_units, per_step)
     args = [x for i, x in enumerate(args) if not i % nargs == nargs - 1]
     yield from bsp.grid_scan(
