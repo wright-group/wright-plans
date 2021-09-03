@@ -88,12 +88,11 @@ def scan(detectors, *args, num=None, constants=None, per_step=None, md=None):
         "plan_args": {
             "detectors": list(map(repr, detectors)),
             "args": md_args,
-            "plan_axis_units": axis_units,
             "constants": constants,
             "per_step": repr(per_step),
         },
         "plan_constants": constants,
-        "plan_axis_units": axis_units,
+        "plan_axis_units": {k.name: v for k, v in axis_units.items()},
     }
     _md.update(md or {})
     per_step = make_one_nd_step(constants, axis_units, per_step)
@@ -114,7 +113,7 @@ def rel_scan(detectors, *args, num=None, constants=None, per_step=None, md=None)
             "per_step": repr(per_step),
         },
         "plan_constants": constants,
-        "plan_axis_units": axis_units,
+        "plan_axis_units": {k.name: v for k, v in axis_units.items()},
     }
     _md.update(md or {})
     per_step = make_one_nd_step(constants, axis_units, per_step)
@@ -135,7 +134,7 @@ def list_scan(detectors, *args, constants=None, per_step=None, md=None):
             "per_step": repr(per_step),
         },
         "plan_constants": constants,
-        "plan_axis_units": axis_units,
+        "plan_axis_units": {k.name: v for k, v in axis_units.items()},
     }
     _md.update(md or {})
     per_step = make_one_nd_step(constants, axis_units, per_step)
@@ -156,7 +155,7 @@ def rel_list_scan(detectors, *args, constants=None, per_step=None, md=None):
             "per_step": repr(per_step),
         },
         "plan_constants": constants,
-        "plan_axis_units": axis_units,
+        "plan_axis_units": {k.name: v for k, v in axis_units.items()},
     }
     _md.update(md or {})
     per_step = make_one_nd_step(constants, axis_units, per_step)
@@ -179,7 +178,7 @@ def list_grid_scan(
             "per_step": repr(per_step),
         },
         "plan_constants": constants,
-        "plan_axis_units": axis_units,
+        "plan_axis_units": {k.name: v for k, v in axis_units.items()},
     }
     _md.update(md or {})
     per_step = make_one_nd_step(constants, axis_units, per_step)
@@ -204,7 +203,7 @@ def rel_list_grid_scan(
             "per_step": repr(per_step),
         },
         "plan_constants": constants,
-        "plan_axis_units": axis_units,
+        "plan_axis_units": {k.name: v for k, v in axis_units.items()},
     }
     _md.update(md or {})
     per_step = make_one_nd_step(constants, axis_units, per_step)
@@ -219,7 +218,7 @@ def grid_scan(
 ):
     nargs = 5
     axis_units = _axis_units_from_args(args, nargs)
-    md_args = [repr(i) if not isinstance(i, (int, float, str, bytes)) else i for i in args]
+    md_args = [repr(i) if isinstance(i, Movable) else i for i in args]
     _md = {
         "plan_name": "grid_scan",
         "plan_args": {
@@ -229,10 +228,9 @@ def grid_scan(
             "per_step": repr(per_step),
         },
         "plan_constants": constants,
-        "plan_axis_units": axis_units,
+        "plan_axis_units": {k.name: v for k, v in axis_units.items()},
     }
     _md.update(md or {})
-    print(_md)
     per_step = make_one_nd_step(constants, axis_units, per_step)
     args = [x for i, x in enumerate(args) if not i % nargs == nargs - 1]
     yield from bsp.grid_scan(
@@ -255,7 +253,7 @@ def rel_grid_scan(
             "per_step": repr(per_step),
         },
         "plan_constants": constants,
-        "plan_axis_units": axis_units,
+        "plan_axis_units": {k.name: v for k, v in axis_units.items()},
     }
     _md.update(md or {})
     per_step = make_one_nd_step(constants, axis_units, per_step)
@@ -273,12 +271,12 @@ def scan_nd(
         "plan_args": {
             "detectors": list(map(repr, detectors)),
             "cycler": repr(cycler),
-            "axis_units": axis_units,
+            "axis_units": {k.name: v for k, v in axis_units.items()},
             "constants": constants,
             "per_step": repr(per_step),
         },
         "plan_constants": constants,
-        "plan_axis_units": axis_units,
+        "plan_axis_units": {k.name: v for k, v in axis_units.items()},
     }
     _md.update(md or {})
     per_step = make_one_nd_step(constants, axis_units, per_step)
