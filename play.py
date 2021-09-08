@@ -16,6 +16,7 @@ from wright_plans._messages import register_set_except
 from bluesky_autonomic import OPADevice
 
 import databroker
+
 cat = databroker.catalog["mongo"]
 
 
@@ -34,4 +35,3 @@ RE.subscribe(cat.v1.insert)
 register_set_except(RE)
 
 RE(grid_scan([daq], d1, 1, 2, 10, "cm", wm, 1500, 1600, 3, "wn"))
-
