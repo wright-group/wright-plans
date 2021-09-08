@@ -5,7 +5,7 @@ from cycler import cycler
 
 from ._constants import Constant, ConstantTerm
 from ._messages import set_relative_to_func_wrapper, inject_set_position_except_wrapper
-from ._plans import scan_nd
+from ._plans import scan_nd_wp
 
 
 def motortune(detectors, opa, use_tune_points, motors, spectrometer=None, *, md=None):
@@ -84,7 +84,7 @@ def motortune(detectors, opa, use_tune_points, motors, spectrometer=None, *, md=
             )
             axis_units[spectrometer["device"]] = "nm"
 
-    plan = scan_nd(detectors, cyc, axis_units=axis_units, constants=constants, md=md)
+    plan = scan_nd_wp(detectors, cyc, axis_units=axis_units, constants=constants, md=md)
     if relative_sets:
         plan = set_relative_to_func_wrapper(plan, relative_sets)
     if exceptions:
