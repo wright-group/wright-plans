@@ -1,14 +1,14 @@
 __all__ = [
     "make_one_nd_step",
-    "scan",
-    "rel_scan",
-    "list_scan",
-    "rel_list_scan",
-    "list_grid_scan",
-    "rel_list_grid_scan",
-    "grid_scan",
-    "rel_grid_scan",
-    "scan_nd",
+    "scan_wp",
+    "rel_scan_wp",
+    "list_scan_wp",
+    "rel_list_scan_wp",
+    "list_grid_scan_wp",
+    "rel_list_grid_scan_wp",
+    "grid_scan_wp",
+    "rel_grid_scan_wp",
+    "scan_nd_wp",
 ]
 
 from graphlib import TopologicalSorter
@@ -94,12 +94,12 @@ def _axis_units_from_args(args, n):
     return {m: u for m, *_, u in toolz.partition(n, args) if u}
 
 
-def scan(detectors, *args, num=None, constants=None, per_step=None, md=None):
+def scan_wp(detectors, *args, num=None, constants=None, per_step=None, md=None):
     nargs = 4
     axis_units = _axis_units_from_args(args, nargs)
     md_args = [repr(i) if isinstance(i, Movable) else i for i in args]
     _md = {
-        "plan_name": "scan",
+        "plan_name": "scan_wp",
         "plan_args": {
             "detectors": list(map(repr, detectors)),
             "args": md_args,
@@ -115,12 +115,12 @@ def scan(detectors, *args, num=None, constants=None, per_step=None, md=None):
     yield from bsp.scan(detectors, *args, num=num, per_step=per_step, md=_md)
 
 
-def rel_scan(detectors, *args, num=None, constants=None, per_step=None, md=None):
+def rel_scan_wp(detectors, *args, num=None, constants=None, per_step=None, md=None):
     nargs = 4
     axis_units = _axis_units_from_args(args, nargs)
     md_args = [repr(i) if isinstance(i, Movable) else i for i in args]
     _md = {
-        "plan_name": "rel_scan",
+        "plan_name": "rel_scan_wp",
         "plan_args": {
             "detectors": list(map(repr, detectors)),
             "args": md_args,
@@ -136,12 +136,12 @@ def rel_scan(detectors, *args, num=None, constants=None, per_step=None, md=None)
     yield from bsp.rel_scan(detectors, *args, num=num, per_step=per_step, md=_md)
 
 
-def list_scan(detectors, *args, constants=None, per_step=None, md=None):
+def list_scan_wp(detectors, *args, constants=None, per_step=None, md=None):
     nargs = 3
     axis_units = _axis_units_from_args(args, nargs)
     md_args = [repr(i) if isinstance(i, Movable) else i for i in args]
     _md = {
-        "plan_name": "list_scan",
+        "plan_name": "list_scan_wp",
         "plan_args": {
             "detectors": list(map(repr, detectors)),
             "args": md_args,
@@ -157,12 +157,12 @@ def list_scan(detectors, *args, constants=None, per_step=None, md=None):
     yield from bsp.list_scan(detectors, *args, per_step=per_step, md=_md)
 
 
-def rel_list_scan(detectors, *args, constants=None, per_step=None, md=None):
+def rel_list_scan_wp(detectors, *args, constants=None, per_step=None, md=None):
     nargs = 3
     axis_units = _axis_units_from_args(args, nargs)
     md_args = [repr(i) if isinstance(i, Movable) else i for i in args]
     _md = {
-        "plan_name": "rel_list_scan",
+        "plan_name": "rel_list_scan_wp",
         "plan_args": {
             "detectors": list(map(repr, detectors)),
             "args": md_args,
@@ -178,14 +178,14 @@ def rel_list_scan(detectors, *args, constants=None, per_step=None, md=None):
     yield from bsp.rel_list_scan(detectors, *args, per_step=per_step, md=_md)
 
 
-def list_grid_scan(
+def list_grid_scan_wp(
     detectors, *args, constants=None, snake_axes=False, per_step=None, md=None
 ):
     nargs = 3
     axis_units = _axis_units_from_args(args, nargs)
     md_args = [repr(i) if isinstance(i, Movable) else i for i in args]
     _md = {
-        "plan_name": "list_grid_scan",
+        "plan_name": "list_grid_scan_wp",
         "plan_args": {
             "detectors": list(map(repr, detectors)),
             "args": md_args,
@@ -203,14 +203,14 @@ def list_grid_scan(
     )
 
 
-def rel_list_grid_scan(
+def rel_list_grid_scan_wp(
     detectors, *args, constants=None, snake_axes=False, per_step=None, md=None
 ):
     nargs = 3
     axis_units = _axis_units_from_args(args, nargs)
     md_args = [repr(i) if isinstance(i, Movable) else i for i in args]
     _md = {
-        "plan_name": "rel_list_grid_scan",
+        "plan_name": "rel_list_grid_scan_wp",
         "plan_args": {
             "detectors": list(map(repr, detectors)),
             "args": md_args,
@@ -228,14 +228,14 @@ def rel_list_grid_scan(
     )
 
 
-def grid_scan(
+def grid_scan_wp(
     detectors, *args, constants=None, snake_axes=False, per_step=None, md=None
 ):
     nargs = 5
     axis_units = _axis_units_from_args(args, nargs)
     md_args = [repr(i) if isinstance(i, Movable) else i for i in args]
     _md = {
-        "plan_name": "grid_scan",
+        "plan_name": "grid_scan_wp",
         "plan_args": {
             "detectors": list(map(repr, detectors)),
             "args": md_args,
@@ -254,14 +254,14 @@ def grid_scan(
     )
 
 
-def rel_grid_scan(
+def rel_grid_scan_wp(
     detectors, *args, constants=None, snake_axes=False, per_step=None, md=None
 ):
     nargs = 5
     axis_units = _axis_units_from_args(args, nargs)
     md_args = [repr(i) if isinstance(i, Movable) else i for i in args]
     _md = {
-        "plan_name": "rel_grid_scan",
+        "plan_name": "rel_grid_scan_wp",
         "plan_args": {
             "detectors": list(map(repr, detectors)),
             "args": md_args,
@@ -279,11 +279,11 @@ def rel_grid_scan(
     )
 
 
-def scan_nd(
+def scan_nd_wp(
     detectors, cycler, *, axis_units=None, constants=None, per_step=None, md=None
 ):
     _md = {
-        "plan_name": "scan_nd",
+        "plan_name": "scan_nd_wp",
         "plan_args": {
             "detectors": list(map(repr, detectors)),
             "cycler": repr(cycler),
