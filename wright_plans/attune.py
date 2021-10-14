@@ -87,7 +87,7 @@ def motortune(detectors, opa, use_tune_points, motors, spectrometer=None, *, md=
                 ),
             )
             shape.append(spectrometer["npts"])
-            axis_units[spectrometer["device"]] = "nm"
+            axis_units[spectrometer["device"]] = "wn"
 
     md["shape"] = shape
     plan = scan_nd_wp(detectors, cyc, axis_units=axis_units, constants=constants, md=md)
