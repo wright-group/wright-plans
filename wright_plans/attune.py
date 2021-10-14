@@ -11,8 +11,8 @@ from ._plans import scan_nd_wp
 def motortune(detectors, opa, use_tune_points, motors, spectrometer=None, *, md=None):
     cyc = 1
     md = md or {}
-    instr = attune.Instrument(**opa.instrument)
-    arrangement = opa.arrangement
+    instr = attune.Instrument(**opa.yaq_client.get_instrument())
+    arrangement = opa.yaq_client.get_arrangement()
     relative_sets = {}
     exceptions = []
     constants = {}
