@@ -17,14 +17,17 @@ def motortune(detectors, opa, use_tune_points, motors, spectrometer=None, *, md=
     exceptions = []
     constants = {}
     axis_units = {}
+    shape = []
 
     scanned_motors = [
         m for m, params in motors.items() if params.get("method") == "scan"
     ]
 
     if use_tune_points:
-        cyc = cycler(opa, get_tune_points(instr, instr[arrangement], scanned_motors))
+        tune_points = get_tune_points(instr, instr[arrangement], scanned_motors)
+        cyc = cycler(opa, tune_points)
         axis_units[opa] = "nm"  # TODO more robust units?
+        shape.append(len(tune_points))
     for mot, params in motors.items():
         if params["method"] == "static":
             yield Msg("set", getattr(opa, mot), params["center"])
@@ -49,6 +52,7 @@ def motortune(detectors, opa, use_tune_points, motors, spectrometer=None, *, md=
                     params["npts"],
                 ),
             )
+            shape.append(params["npts"])
     if spectrometer and spectrometer["device"]:
         if spectrometer["method"] == "static":
             yield Msg("set", spectrometer["device"], spectrometer["center"])
@@ -82,8 +86,10 @@ def motortune(detectors, opa, use_tune_points, motors, spectrometer=None, *, md=
                     spectrometer["npts"],
                 ),
             )
+            shape.append(spectrometer["npts"])
             axis_units[spectrometer["device"]] = "nm"
 
+    md["shape"] = shape
     plan = scan_nd_wp(detectors, cyc, axis_units=axis_units, constants=constants, md=md)
     if relative_sets:
         plan = set_relative_to_func_wrapper(plan, relative_sets)
