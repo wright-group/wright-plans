@@ -73,7 +73,7 @@ def motortune(detectors, opa, use_tune_points, motors, spectrometer=None, *, md=
 
                 def _spec_rel(opa):
                     def _spec_rel_inner():
-                        return opa.position
+                        return 1e7/opa.position
 
                     return _spec_rel_inner
 
