@@ -61,19 +61,14 @@ def motortune(detectors, opa, use_tune_points, motors, spectrometer=None, *, md=
         elif spectrometer["method"] == "track":
             constants[spectrometer["device"]] = Constant("nm", [ConstantTerm(1, opa)])
         elif spectrometer["method"] == "set":
-            if use_tune_points:
-                constants[spectrometer["device"]] = Constant(
-                    "nm", [ConstantTerm(1, opa)]
-                )
-            else:
-                yield Msg("set", spectrometer["device"], spectrometer["center"])
+            yield Msg("set", spectrometer["device"], spectrometer["center"])
         elif spectrometer["method"] == "scan":
             if use_tune_points:
                 spectrometer["center"] = 0
 
                 def _spec_rel(opa):
                     def _spec_rel_inner():
-                        return 1e7/opa.position
+                        return opa.position
 
                     return _spec_rel_inner
 
@@ -87,7 +82,7 @@ def motortune(detectors, opa, use_tune_points, motors, spectrometer=None, *, md=
                 ),
             )
             shape.append(spectrometer["npts"])
-            axis_units[spectrometer["device"]] = "wn"
+            axis_units[spectrometer["device"]] = "nm"
 
     md["shape"] = shape
     plan = scan_nd_wp(detectors, cyc, axis_units=axis_units, constants=constants, md=md)
