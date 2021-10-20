@@ -3,9 +3,16 @@ import numpy as np
 from bluesky import Msg
 from cycler import cycler
 
+import yaqc_bluesky
+
 from ._constants import Constant, ConstantTerm
 from ._messages import set_relative_to_func_wrapper, inject_set_position_except_wrapper
 from ._plans import scan_nd_wp
+
+def NullStatus():
+    s = yaqc_bluesky._status.Status()
+    s.set_finished()
+    return s
 
 class OpaMotor:
     def __init__(self, opa, motor: str):
@@ -15,6 +22,7 @@ class OpaMotor:
 
     def set(self, position):
         self.parent.yaq_client.set_setable_positions({self.motor: position})
+        return NullStatus()
 
     def describe(self):
         parent_desc = self.parent.describe()
@@ -31,7 +39,7 @@ class OpaMotor:
         return {}
 
     def trigger(self):
-        pass
+        return NullStatus()
 
 def motortune(detectors, opa, use_tune_points, motors, spectrometer=None, *, md=None):
     cyc = 1
