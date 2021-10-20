@@ -14,7 +14,7 @@ class OpaMotor:
         self.name = f"{opa.name}_{motor}"
 
     def set(self, position):
-        self.parent.yaq_client.set_setable_positions(**{self.motor: position})
+        self.parent.yaq_client.set_setable_positions({self.motor: position})
 
     def describe(self):
         parent_desc = self.parent.describe()
