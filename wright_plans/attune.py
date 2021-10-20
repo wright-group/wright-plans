@@ -7,6 +7,31 @@ from ._constants import Constant, ConstantTerm
 from ._messages import set_relative_to_func_wrapper, inject_set_position_except_wrapper
 from ._plans import scan_nd_wp
 
+class OpaMotor:
+    def __init__(self, opa, motor: str):
+        self.motor = motor
+        self.parent = opa
+        self.name = f"{opa.name}_{motor}"
+
+    def set(self, position):
+        self.parent.yaq_client.set_setable_positions(**{self.motor: position})
+
+    def describe(self):
+        parent_desc = self.parent.describe()
+        parent_name = self.parent.name
+        return {self.name: {"source": parent_desc[parent_name]["source"], "shape":(), "dtype": "number"}}
+
+    def read(self):
+        return {self.name: self.parent.yaq_client.get_setable_positions()[self.motor]}
+
+    def describe_configuration(self):
+        return {}
+
+    def read_configuratgion(self):
+        return {}
+
+    def trigger(self):
+        pass
 
 def motortune(detectors, opa, use_tune_points, motors, spectrometer=None, *, md=None):
     cyc = 1
@@ -29,6 +54,9 @@ def motortune(detectors, opa, use_tune_points, motors, spectrometer=None, *, md=
         axis_units[opa] = "nm"  # TODO more robust units?
         shape.append(len(tune_points))
     for mot, params in motors.items():
+        if isinstance(mot, str):
+            mot = OpaMotor(opa, mot)
+
         if params["method"] == "static":
             yield Msg("set", getattr(opa, mot), params["center"])
             exceptions += [mot]
