@@ -58,7 +58,7 @@ def motortune(detectors, opa, use_tune_points, motors, spectrometer=None, *, md=
             mot = OpaMotor(opa, mot)
 
         if params["method"] == "static":
-            yield Msg("set", getattr(opa, mot), params["center"])
+            yield Msg("set",  mot, params["center"])
             exceptions += [mot]
         elif params["method"] == "scan":
             exceptions += [mot]
@@ -71,9 +71,9 @@ def motortune(detectors, opa, use_tune_points, motors, spectrometer=None, *, md=
 
                     return _motor_rel_inner
 
-                relative_sets[getattr(opa, mot)] = _motor_rel(opa, mot)
+                relative_sets[mot] = _motor_rel(opa, mot)
             cyc *= cycler(
-                getattr(opa, mot),
+                mot,
                 np.linspace(
                     params["center"] - params["width"] / 2,
                     params["center"] + params["width"] / 2,
