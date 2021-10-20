@@ -67,7 +67,7 @@ def motortune(detectors, opa, use_tune_points, motors, spectrometer=None, *, md=
 
                 def _motor_rel(opa, motor):
                     def _motor_rel_inner():
-                        return instr(opa.position, arrangement)[motor]
+                        return instr(opa.position, arrangement)[motor.motor]
 
                     return _motor_rel_inner
 
