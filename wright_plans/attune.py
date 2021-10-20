@@ -116,7 +116,7 @@ def motortune(detectors, opa, use_tune_points, motors, spectrometer=None, *, md=
     plan = scan_nd_wp(detectors, cyc, axis_units=axis_units, constants=constants, md=md)
     if relative_sets:
         plan = set_relative_to_func_wrapper(plan, relative_sets)
-    if exceptions:
+    if False:
         plan = inject_set_position_except_wrapper(plan, opa, exceptions)
     return (yield from plan)
 
