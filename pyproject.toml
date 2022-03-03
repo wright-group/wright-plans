@@ -2,14 +2,15 @@
 requires = ["flit_core >=2,<4"]
 build-backend = "flit_core.buildapi"
 
-[tool.flit.metadata]
-module = "wright_plans"
+[project]
+name = "wright_plans"
 author = "Kyle Sunden"
 author-email = "contact@ksunden.space"
 home-page = "https://github.com/wright-group/bluesky-wright"
 description-file = "README.md"
 classifiers = [ "License :: OSI Approved :: MIT License",]
 requires = ["bluesky", "pint", "toolz"]
+requires-python = ">=3.9"
 
 [tool.flit.metadata.requires-extra]
 attune = ["attune", "numpy", "cycler"]
