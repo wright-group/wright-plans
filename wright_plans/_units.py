@@ -1,5 +1,7 @@
 __all__ = ["ureg", "get_units"]
 
+from functools import lru_cache
+
 import pint
 
 ureg = pint.UnitRegistry()
@@ -21,6 +23,7 @@ ureg.enable_contexts("spectroscopy")
 
 
 # TODO make sure unit retrival is accurate, robust
+@lru_cache
 def get_units(device, default=None):
     if device is None:
         return default

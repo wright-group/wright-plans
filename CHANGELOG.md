@@ -5,6 +5,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Changed
+- Cached units using lru cache to avoid consistant calls to describe
+
 ## [2021.9.0]
 
 ### Added
