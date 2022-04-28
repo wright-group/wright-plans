@@ -8,7 +8,7 @@ def inject_set_position_except_wrapper(plan, device, exceptions: List[str]):
         if msg.command == "set" and msg.obj == device:
             kwargs = msg.kwargs
             kwargs["exceptions"] = exceptions
-            return bluesky.Msg("set", msg.obj, *msg.args, run=msg.run, **kwargs)
+            return bluesky.Msg("set_except", msg.obj, *msg.args, run=msg.run, **kwargs)
         return msg
 
     return (
@@ -20,10 +20,9 @@ inject_set_position_except = make_decorator(inject_set_position_except_wrapper)
 
 
 def register_set_except(RE):
-    return
     RE.register_command(
         "set_except",
-        lambda msg: msg.obj.set_position_except(
+        lambda msg: msg.obj.yaq_client.set_position_except(
             *msg.args, exceptions=msg.kwargs["exceptions"]
         ),
     )
