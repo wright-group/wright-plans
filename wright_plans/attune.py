@@ -21,6 +21,7 @@ def motortune(detectors, opa, use_tune_points, motors, spectrometer=None, *, md=
     scanned_motors = [
         m for m, params in motors.items() if params.get("method") == "scan"
     ]
+    print(scanned_motors)
 
     if use_tune_points:
         cyc = cycler(opa, get_tune_points(instr, instr[arrangement], scanned_motors))
@@ -125,6 +126,7 @@ def get_tune_points(instrument, arrangement, scanned_motors):
 def run_holistic(detectors, opa, motor0, motor1, width, npts, spectrometer, *, md=None):
     return (
         yield from motortune(
+            # TODO likely get rid of adding motor0 to detectors, its a string
             detectors + [motor0],
             opa,
             True,
