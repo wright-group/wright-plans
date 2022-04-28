@@ -16,7 +16,7 @@ class ConstantTerm:
 
 @dataclass
 class Constant:
-    units: str
+    units: Optional[str]
     terms: List[ConstantTerm]
 
     def evaluate(self, setpoints, units: Optional[str] = None) -> float:
@@ -35,4 +35,7 @@ class Constant:
             ).to(self.units)
             mot_quantity *= term.coeff
             quantity += mot_quantity
+        if units is None:
+            # Use native units/cannot convert "to"
+            return quantity.magnitude
         return quantity.to(units).magnitude
