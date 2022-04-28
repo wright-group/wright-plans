@@ -12,7 +12,7 @@ def motortune(detectors, opa, use_tune_points, motors, spectrometer=None, *, md=
     cyc = 1
     md = md or {}
     instr = attune.Instrument(**opa.yaq_client.get_instrument())
-    arrangement = opa.arrangement
+    arrangement = opa.yaq_client.get_arrangement()
     relative_sets = {}
     exceptions = []
     constants = {}
