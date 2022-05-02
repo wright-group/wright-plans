@@ -4,17 +4,16 @@ from bluesky import Msg
 from cycler import cycler
 
 from ._constants import Constant, ConstantTerm
-from ._messages import set_relative_to_func_wrapper, inject_set_position_except_wrapper
+from ._messages import set_relative_to_func_wrapper
 from ._plans import scan_nd_wp
 
 
 def motortune(detectors, opa, use_tune_points, motors, spectrometer=None, *, md=None):
     cyc = 1
     md = md or {}
-    instr = attune.Instrument(**opa.instrument)
-    arrangement = opa.arrangement
+    instr = attune.Instrument(**opa.yaq_client.get_instrument())
+    arrangement = opa.yaq_client.get_arrangement()
     relative_sets = {}
-    exceptions = []
     constants = {}
     axis_units = {}
 
@@ -27,10 +26,8 @@ def motortune(detectors, opa, use_tune_points, motors, spectrometer=None, *, md=
         axis_units[opa] = "nm"  # TODO more robust units?
     for mot, params in motors.items():
         if params["method"] == "static":
-            yield Msg("set", getattr(opa, mot), params["center"])
-            exceptions += [mot]
+            cyc *= cycler(getattr(opa, mot), [params["center"]])
         elif params["method"] == "scan":
-            exceptions += [mot]
             if use_tune_points:
                 params["center"] = 0
 
@@ -51,9 +48,9 @@ def motortune(detectors, opa, use_tune_points, motors, spectrometer=None, *, md=
             )
     if spectrometer and spectrometer["device"]:
         if spectrometer["method"] == "static":
-            yield Msg("set", spectrometer["device"], spectrometer["center"])
+            yield Msg("set", spectrometer["device"], spectrometer["center"], group="motortune_prep")
         elif spectrometer["method"] == "zero":
-            yield Msg("set", spectrometer["device"], 0)
+            yield Msg("set", spectrometer["device"], 0, group="motortune_prep")
         elif spectrometer["method"] == "track":
             constants[spectrometer["device"]] = Constant("nm", [ConstantTerm(1, opa)])
         elif spectrometer["method"] == "set":
@@ -62,7 +59,7 @@ def motortune(detectors, opa, use_tune_points, motors, spectrometer=None, *, md=
                     "nm", [ConstantTerm(1, opa)]
                 )
             else:
-                yield Msg("set", spectrometer["device"], spectrometer["center"])
+                yield Msg("set", spectrometer["device"], spectrometer["center"], group="motortune_prep")
         elif spectrometer["method"] == "scan":
             if use_tune_points:
                 spectrometer["center"] = 0
@@ -84,11 +81,10 @@ def motortune(detectors, opa, use_tune_points, motors, spectrometer=None, *, md=
             )
             axis_units[spectrometer["device"]] = "nm"
 
+    yield Msg("wait", None, "motortune_prep")
     plan = scan_nd_wp(detectors, cyc, axis_units=axis_units, constants=constants, md=md)
     if relative_sets:
         plan = set_relative_to_func_wrapper(plan, relative_sets)
-    if exceptions:
-        plan = inject_set_position_except_wrapper(plan, opa, exceptions)
     return (yield from plan)
 
 
@@ -125,6 +121,7 @@ def get_tune_points(instrument, arrangement, scanned_motors):
 def run_holistic(detectors, opa, motor0, motor1, width, npts, spectrometer, *, md=None):
     return (
         yield from motortune(
+            # TODO likely get rid of adding motor0 to detectors, its a string
             detectors + [motor0],
             opa,
             True,
