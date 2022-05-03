@@ -27,3 +27,4 @@ def test_grid_scan(RE):
 
     assert dc.start[0]["plan_name"] == "grid_scan_wp"
     assert dc.start[0]["shape"] == (3, 5)
+    assert set(dc.start[0]["motors"]) == {"d1", "d2"}

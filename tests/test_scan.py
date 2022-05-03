@@ -27,3 +27,4 @@ def test_scan(RE):
 
     assert dc.start[0]["plan_name"] == "scan_wp"
     assert dc.start[0]["num_points"] == 3
+    assert set(dc.start[0]["motors"]) == {"d1", "d2"}
