@@ -6,20 +6,12 @@ import numpy as np
 from wright_plans import grid_scan_wp
 from .utils import _retrieve_motor_positions
 
-def test_grid_scan(RE):
-    d1 = yaqc_bluesky.Device(38401)
-    d2 = yaqc_bluesky.Device(38402)
-    d0 = yaqc_bluesky.Device(38500)
-    d1.yaq_client.set_zero_position(12.5)
-    d2.yaq_client.set_zero_position(12.5)
-    d0.yaq_client.set_zero_position(100)
-    sensor = yaqc_bluesky.Device(38999)
-
+def test_constants(RE, hw):
     dc = DocCollector()
 
-    RE(grid_scan_wp([sensor], d1, -1, 1, 3, "ps", d2, -1, 1, 5, "ps", constants=[[d0, "ps", [[1, d1],[1, d2],[-1, None]]]]), dc.insert)
+    RE(grid_scan_wp([hw.daq], hw.d1, -1, 1, 3, "ps", hw.d2, -1, 1, 5, "ps", constants=[[hw.d0, "ps", [[1, hw.d1],[1, hw.d2],[-1, None]]]]), dc.insert)
 
-    positions = _retrieve_motor_positions(dc, [d0, d1, d2])
+    positions = _retrieve_motor_positions(dc, [hw.d0, hw.d1, hw.d2])
     
     expected_d1 = np.stack([[-1, 0, 1]]*5).T.flatten()
     expected_d2 = np.stack([[-1, -0.5, 0, 0.5, 1]]*3).flatten()

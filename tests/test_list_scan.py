@@ -6,18 +6,12 @@ import numpy as np
 from wright_plans import list_scan_wp
 from .utils import _retrieve_motor_positions
 
-def test_list_scan(RE):
-    d1 = yaqc_bluesky.Device(38401)
-    d2 = yaqc_bluesky.Device(38402)
-    d1.yaq_client.set_zero_position(12.5)
-    d2.yaq_client.set_zero_position(12.5)
-    sensor = yaqc_bluesky.Device(38999)
-
+def test_list_scan(RE, hw):
     dc = DocCollector()
 
-    RE(list_scan_wp([sensor], d1, [-1, 0, 1], "ps", d2, [1, 0, -1], "ps"), dc.insert)
+    RE(list_scan_wp([hw.daq], hw.d1, [-1, 0, 1], "ps", hw.d2, [1, 0, -1], "ps"), dc.insert)
 
-    positions = _retrieve_motor_positions(dc, [d1, d2])
+    positions = _retrieve_motor_positions(dc, [hw.d1, hw.d2])
     
     expected_d1 = [-1, 0, 1]
     expected_d2 = [1, 0, -1]
