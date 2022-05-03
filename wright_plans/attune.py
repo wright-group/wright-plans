@@ -7,7 +7,7 @@ from ._constants import Constant, ConstantTerm
 from ._messages import set_relative_to_func_wrapper
 from ._plans import scan_nd_wp
 
-def _spectromter_md(spectromter):
+def _spectrometer_md(spectrometer):
     if spectrometer is None:
         return None
     spectrometer_md = spectrometer.copy()
@@ -91,7 +91,7 @@ def motortune(detectors, opa, use_tune_points, motors, spectrometer=None, *, md=
             )
             cyc *= cycler(spectrometer["device"], pts)
             axis_units[spectrometer["device"]] = "nm"
-            shape.append(params["npts"])
+            shape.append(spectrometer["npts"])
             pattern_args.extend([repr(spectrometer["device"]), pts])
 
     yield Msg("wait", None, "motortune_prep")
