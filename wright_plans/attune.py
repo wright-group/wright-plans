@@ -161,12 +161,11 @@ def run_holistic(detectors, opa, motor0, motor1, width, npts, spectrometer, *, m
             "spectrometer": _spectrometer_md(spectrometer),
         },
         "hints": {},
+        "motors": [f"{opa.name}_{motor0}", f"{opa.name}_{motor1}"],
     }
-    # TODO hints for transform of motor0, motor1 instead of opa, motor1
     return (
         yield from motortune(
-            # TODO likely get rid of adding motor0 to detectors, its a string
-            detectors + [motor0],
+            detectors,
             opa,
             True,
             {motor1: {"method": "scan", "width": width, "npts": npts}},
