@@ -63,6 +63,55 @@ def test_spec_types(RE, hw, spec_type):
     npt.assert_array_almost_equal(positions["w1"], expected_opa)
     npt.assert_array_almost_equal(positions["wm"], expected_spec)
 
+@pytest.mark.parametrize("spec_units", ["nm", "wn"])
+def test_spec_units(RE, hw, spec_units):
+    dc = DocCollector()
+    RE(motortune([hw.spec], hw.opa, True, {}, {"device": hw.spec, "method": "scan", "units": spec_units, "width": -100, "npts": 3}), dc.insert)
+    runid = list(dc.event.keys())[0]
+    assert len(dc.event[runid]) == num_tune_points * 3
+    assert dc.start[0]["num_points"] == num_tune_points * 3
+    assert dc.start[0]["shape"] == (num_tune_points, 3)
+    assert dc.start[0]["plan_pattern"] == "outer_list_product"
+    assert dc.start[0]["plan_name"] == "motortune"
+
+    positions = _retrieve_motor_positions(dc, [hw.spec, hw.opa])
+
+    expected_opa = np.stack([np.linspace(1200, 1700, 5)]*3).T.flatten()
+    if spec_units == "nm":
+        expected_spec = (np.stack([[50, 0, -50]] * 5) + np.linspace(1200, 1700, 5)[:, None]).flatten()
+    else:
+        # Convert to wn, add, convert back to nm for comparison
+        expected_spec = 1e7/(np.stack([[50, 0, -50]] * 5) + 1e7/np.linspace(1200, 1700, 5)[:, None]).flatten()
+
+    npt.assert_array_almost_equal(positions["w1"], expected_opa)
+    npt.assert_array_almost_equal(positions["wm"], expected_spec)
+
+
+@pytest.mark.parametrize("spec_units", ["nm", "wn"])
+def test_spec_static_units(RE, hw, spec_units):
+    dc = DocCollector()
+    RE(motortune([hw.spec], hw.opa, True, {}, {"device": hw.spec, "method": "static", "units": spec_units, "center": 2000, "npts": 3}), dc.insert)
+    runid = list(dc.event.keys())[0]
+    assert len(dc.event[runid]) == num_tune_points
+    assert dc.start[0]["num_points"] == num_tune_points
+    assert dc.start[0]["shape"] == (num_tune_points,)
+    assert dc.start[0]["plan_pattern"] == "outer_list_product"
+    assert dc.start[0]["plan_name"] == "motortune"
+
+    positions = _retrieve_motor_positions(dc, [hw.spec, hw.opa])
+
+    expected_opa = np.linspace(1200, 1700, 5)
+    if spec_units == "nm":
+        expected_spec = 2000
+    else:
+        # Convert to 2000 wn to nm for comparison
+        expected_spec = 5000
+
+    npt.assert_array_almost_equal(positions["w1"], expected_opa)
+    npt.assert_array_almost_equal(positions["wm"], expected_spec)
+
+
+
 
 @pytest.mark.parametrize("use_tune_points", [True, False])
 def test_use_tune_points(RE, hw, use_tune_points):

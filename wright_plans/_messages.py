@@ -2,6 +2,8 @@ import bluesky
 from bluesky.utils import make_decorator
 from typing import List
 
+from ._units import ureg
+
 
 def inject_set_position_except_wrapper(plan, device, exceptions: List[str]):
     def _inject_set_position_except(msg):
@@ -32,8 +34,13 @@ def set_relative_to_func_wrapper(plan, dic):
     def _set_relative(msg):
         if msg.command == "set" and msg.obj in dic:
             args = list(msg.args)
-            args[0] += dic[msg.obj]()
-            return bluesky.Msg("set", msg.obj, *args, run=msg.run, **msg.kwargs)
+            func = dic[msg.obj]["func"]
+            native = dic[msg.obj]["native"]
+            differential = dic[msg.obj]["differential"]
+            quant = ureg.Quantity(func(), native).to(differential)
+            quant += ureg.Quantity(args[0], differential)
+            quant = quant.to(native)
+            return bluesky.Msg("set", msg.obj, quant.magnitude, run=msg.run, **msg.kwargs)
         return msg
 
     return (yield from bluesky.preprocessors.msg_mutator(plan, _set_relative))
