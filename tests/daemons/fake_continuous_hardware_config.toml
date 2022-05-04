@@ -24,6 +24,6 @@ units = "deg"
 
 [w1_delay_1]
 port=37674
-limits=[0, 10]
+limits=[0, 20]
 velocity = 100000
 units = "mm"
