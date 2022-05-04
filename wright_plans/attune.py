@@ -7,23 +7,35 @@ from ._constants import Constant, ConstantTerm
 from ._messages import set_relative_to_func_wrapper
 from ._plans import scan_nd_wp
 
+def _spectrometer_md(spectrometer):
+    if spectrometer is None:
+        return None
+    spectrometer_md = spectrometer.copy()
+    if spectrometer_md.get("device"):
+        spectrometer_md["device"] = repr(spectrometer["device"])
+    return spectrometer_md
 
 def motortune(detectors, opa, use_tune_points, motors, spectrometer=None, *, md=None):
     cyc = 1
     md = md or {}
-    instr = attune.Instrument(**opa.yaq_client.get_instrument())
-    arrangement = opa.yaq_client.get_arrangement()
     relative_sets = {}
     constants = {}
     axis_units = {}
+    shape = []
+    pattern_args = []
 
     scanned_motors = [
         m for m, params in motors.items() if params.get("method") == "scan"
     ]
 
     if use_tune_points:
-        cyc = cycler(opa, get_tune_points(instr, instr[arrangement], scanned_motors))
+        instr = attune.Instrument(**opa.yaq_client.get_instrument())
+        arrangement = opa.yaq_client.get_arrangement()
+        tune_points = get_tune_points(instr, instr[arrangement], scanned_motors)
+        cyc = cycler(opa, tune_points)
         axis_units[opa] = "nm"  # TODO more robust units?
+        shape.append(len(tune_points))
+        pattern_args.extend([repr(opa), tune_points])
     for mot, params in motors.items():
         if params["method"] == "static":
             cyc *= cycler(getattr(opa, mot), [params["center"]])
@@ -38,14 +50,15 @@ def motortune(detectors, opa, use_tune_points, motors, spectrometer=None, *, md=
                     return _motor_rel_inner
 
                 relative_sets[getattr(opa, mot)] = _motor_rel(opa, mot)
-            cyc *= cycler(
-                getattr(opa, mot),
-                np.linspace(
-                    params["center"] - params["width"] / 2,
-                    params["center"] + params["width"] / 2,
-                    params["npts"],
-                ),
+
+            pts = np.linspace(
+                params["center"] - params["width"] / 2,
+                params["center"] + params["width"] / 2,
+                params["npts"],
             )
+            cyc *= cycler(getattr(opa, mot), pts)
+            shape.append(params["npts"])
+            pattern_args.extend([repr(getattr(opa, mot)), pts])
     if spectrometer and spectrometer["device"]:
         if spectrometer["method"] == "static":
             yield Msg("set", spectrometer["device"], spectrometer["center"], group="motortune_prep")
@@ -71,17 +84,34 @@ def motortune(detectors, opa, use_tune_points, motors, spectrometer=None, *, md=
                     return _spec_rel_inner
 
                 relative_sets[spectrometer["device"]] = _spec_rel(opa)
-            cyc *= cycler(
-                spectrometer["device"],
-                np.linspace(
-                    spectrometer["center"] - spectrometer["width"] / 2,
-                    spectrometer["center"] + spectrometer["width"] / 2,
-                    spectrometer["npts"],
-                ),
+            pts = np.linspace(
+                spectrometer["center"] - spectrometer["width"] / 2,
+                spectrometer["center"] + spectrometer["width"] / 2,
+                spectrometer["npts"],
             )
+            cyc *= cycler(spectrometer["device"], pts)
             axis_units[spectrometer["device"]] = "nm"
+            shape.append(spectrometer["npts"])
+            pattern_args.extend([repr(spectrometer["device"]), pts])
 
     yield Msg("wait", None, "motortune_prep")
+    local_md = {
+        "plan_name": "motortune",
+        "plan_args": {
+            "detectors": list(map(repr, detectors)),
+            "opa": repr(opa),
+            "use_tune_points": use_tune_points,
+            "motors": {repr(m): v for m, v in motors.items()},
+            "spectrometer": _spectrometer_md(spectrometer),
+        },
+        "shape": tuple(shape),
+        "plan_pattern": "outer_list_product",
+        "plan_pattern_module": "bluesky.plan_patterns",
+        "plan_pattern_args": {"args": pattern_args},
+        "hints": {},
+    }
+    md = local_md | md
+    md["hints"].setdefault("gridding", "rectilinear")
     plan = scan_nd_wp(detectors, cyc, axis_units=axis_units, constants=constants, md=md)
     if relative_sets:
         plan = set_relative_to_func_wrapper(plan, relative_sets)
@@ -119,21 +149,48 @@ def get_tune_points(instrument, arrangement, scanned_motors):
 
 
 def run_holistic(detectors, opa, motor0, motor1, width, npts, spectrometer, *, md=None):
+    md = md or {}
+    local_md = {
+        "plan_name": "run_holistic",
+        "plan_args": {
+            "detectors": list(map(repr, detectors)),
+            "opa": repr(opa),
+            "motor0": motor0,
+            "motor1": motor1,
+            "width": width,
+            "npts": npts,
+            "spectrometer": _spectrometer_md(spectrometer),
+        },
+        "hints": {},
+        "motors": [f"{opa.name}_{motor0}", f"{opa.name}_{motor1}"],
+    }
     return (
         yield from motortune(
-            # TODO likely get rid of adding motor0 to detectors, its a string
-            detectors + [motor0],
+            detectors,
             opa,
             True,
             {motor1: {"method": "scan", "width": width, "npts": npts}},
             spectrometer,
-            md=md,
+            md=local_md | md,
         )
     )
 
 
 def run_intensity(detectors, opa, motor, width, npts, spectrometer, *, md=None):
     assert not spectrometer or spectrometer["method"] in ("none", "track", "zero")
+    md = md or {}
+    local_md = {
+        "plan_name": "run_intensity",
+        "plan_args": {
+            "detectors": list(map(repr, detectors)),
+            "opa": repr(opa),
+            "motor": motor,
+            "width": width,
+            "npts": npts,
+            "spectrometer": _spectrometer_md(spectrometer),
+        },
+        "hints": {},
+    }
     return (
         yield from motortune(
             detectors,
@@ -141,12 +198,25 @@ def run_intensity(detectors, opa, motor, width, npts, spectrometer, *, md=None):
             True,
             {motor: {"method": "scan", "width": width, "npts": npts}},
             spectrometer,
-            md=md,
+            md=local_md | md,
         )
     )
 
 
 def run_setpoint(detectors, opa, motor, width, npts, spectrometer, *, md=None):
+    md = md or {}
+    local_md = {
+        "plan_name": "run_setpoint",
+        "plan_args": {
+            "detectors": list(map(repr, detectors)),
+            "opa": repr(opa),
+            "motor": motor,
+            "width": width,
+            "npts": npts,
+            "spectrometer": _spectrometer_md(spectrometer),
+        },
+        "hints": {},
+    }
     return (
         yield from motortune(
             detectors,
@@ -154,10 +224,20 @@ def run_setpoint(detectors, opa, motor, width, npts, spectrometer, *, md=None):
             True,
             {motor: {"method": "scan", "width": width, "npts": npts}},
             spectrometer,
-            md=md,
+            md=local_md | md,
         )
     )
 
 
 def run_tune_test(detectors, opa, spectrometer, *, md=None):
-    return (yield from motortune(detectors, opa, True, {}, spectrometer, md=md))
+    md = md or {}
+    local_md = {
+        "plan_name": "run_tune_test",
+        "plan_args": {
+            "detectors": list(map(repr, detectors)),
+            "opa": repr(opa),
+            "spectrometer": _spectrometer_md(spectrometer),
+        },
+        "hints": {},
+    }
+    return (yield from motortune(detectors, opa, True, {}, spectrometer, md=local_md | md))

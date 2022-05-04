@@ -76,6 +76,8 @@ def make_one_nd_step(constants=None, axis_units=None, per_step=None):
 
 
 def _md_constants(constants):
+    if constants is None:
+        return {}
     if isinstance(constants, list):
         constants = {
             mot: Constant(units, [ConstantTerm(coeff, var) for coeff, var in terms])

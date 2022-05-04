@@ -1,0 +1,29 @@
+[d0]
+port=37670
+limits=[-100, 100]
+velocity = 100000
+units = "ps"
+
+[d1]
+port=37671
+limits=[-100, 100]
+velocity = 100000
+units = "ps"
+
+[d2]
+port=37672
+limits=[-100, 100]
+velocity = 100000
+units = "ps"
+
+[w1_crystal_1]
+port=37673
+limits=[0, 360]
+velocity = 100000
+units = "deg"
+
+[w1_delay_1]
+port=37674
+limits=[0, 20]
+velocity = 100000
+units = "mm"

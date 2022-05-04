@@ -1,0 +1,6 @@
+[w1]
+port = 37679
+
+[w1.setables]
+crystal_1 = 37673
+delay_1 = 37674
