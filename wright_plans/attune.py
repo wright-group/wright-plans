@@ -6,6 +6,7 @@ from cycler import cycler
 from ._constants import Constant, ConstantTerm
 from ._messages import set_relative_to_func_wrapper
 from ._plans import scan_nd_wp
+from ._units import ureg
 
 def _spectrometer_md(spectrometer):
     if spectrometer is None:
@@ -49,7 +50,7 @@ def motortune(detectors, opa, use_tune_points, motors, spectrometer=None, *, md=
 
                     return _motor_rel_inner
 
-                relative_sets[getattr(opa, mot)] = _motor_rel(opa, mot)
+                relative_sets[getattr(opa, mot)] = {"func": _motor_rel(opa, mot), "native": "", "differential": ""}
 
             pts = np.linspace(
                 params["center"] - params["width"] / 2,
@@ -61,7 +62,8 @@ def motortune(detectors, opa, use_tune_points, motors, spectrometer=None, *, md=
             pattern_args.extend([repr(getattr(opa, mot)), pts])
     if spectrometer and spectrometer["device"]:
         if spectrometer["method"] == "static":
-            yield Msg("set", spectrometer["device"], spectrometer["center"], group="motortune_prep")
+            center = ureg.Quantity(spectrometer["center"], spectrometer.get("units", "nm")).to("nm").magnitude
+            yield Msg("set", spectrometer["device"], center, group="motortune_prep")
         elif spectrometer["method"] == "zero":
             yield Msg("set", spectrometer["device"], 0, group="motortune_prep")
         elif spectrometer["method"] == "track":
@@ -72,7 +74,8 @@ def motortune(detectors, opa, use_tune_points, motors, spectrometer=None, *, md=
                     "nm", [ConstantTerm(1, opa)]
                 )
             else:
-                yield Msg("set", spectrometer["device"], spectrometer["center"], group="motortune_prep")
+                center = ureg.Quantity(spectrometer["center"], spectrometer.get("units", "nm")).to("nm").magnitude
+                yield Msg("set", spectrometer["device"], center, group="motortune_prep")
         elif spectrometer["method"] == "scan":
             if use_tune_points:
                 spectrometer["center"] = 0
@@ -83,14 +86,14 @@ def motortune(detectors, opa, use_tune_points, motors, spectrometer=None, *, md=
 
                     return _spec_rel_inner
 
-                relative_sets[spectrometer["device"]] = _spec_rel(opa)
+                relative_sets[spectrometer["device"]] = {"func": _spec_rel(opa), "native": "nm", "differential": spectrometer.get("units", "nm")}
             pts = np.linspace(
                 spectrometer["center"] - spectrometer["width"] / 2,
                 spectrometer["center"] + spectrometer["width"] / 2,
                 spectrometer["npts"],
             )
             cyc *= cycler(spectrometer["device"], pts)
-            axis_units[spectrometer["device"]] = "nm"
+            axis_units[spectrometer["device"]] = spectrometer.get("units", "nm")
             shape.append(spectrometer["npts"])
             pattern_args.extend([repr(spectrometer["device"]), pts])
 
