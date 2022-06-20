@@ -100,6 +100,7 @@ def motortune(detectors, opa, use_tune_points, motors, spectrometer=None, *, md=
             pattern_args.extend([repr(spectrometer["device"]), pts])
 
     yield Msg("wait", None, "motortune_prep")
+    scanned_motors = [m.name if hasattr(m, "name") else getattr(opa, m).name for m in scanned_motors]
     local_md = {
         "plan_name": "motortune",
         "plan_args": {
@@ -114,10 +115,14 @@ def motortune(detectors, opa, use_tune_points, motors, spectrometer=None, *, md=
         "plan_pattern_module": "bluesky.plan_patterns",
         "plan_pattern_args": {"args": pattern_args},
         "hints": {},
-        "motors": [m.name if hasattr(m, "name") else getattr(opa, m).name for m in scanned_motors],
+        "motors": scanned_motors,
     }
     md = local_md | md
     md["hints"].setdefault("gridding", "rectilinear")
+    try:
+        md['hints'].setdefault('dimensions', [([m], 'primary') for m in scanned_motors])
+    except (AttributeError, KeyError):
+        ...
     plan = scan_nd_wp(detectors, cyc, axis_units=axis_units, constants=constants, md=md)
     if relative_sets:
         plan = set_relative_to_func_wrapper(plan, relative_sets)
@@ -167,7 +172,7 @@ def run_holistic(detectors, opa, motor0, motor1, width, npts, spectrometer, *, m
             "npts": npts,
             "spectrometer": _spectrometer_md(spectrometer),
         },
-        "hints": {},
+        "hints": {"gridding": "rectilinear", "dimensions":[([f"{opa.name}_{motor0}"], "primary"), ([f"{opa.name}_{motor1}"], "primary")]},
         "motors": [f"{opa.name}_{motor0}", f"{opa.name}_{motor1}"],
     }
     return (

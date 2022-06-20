@@ -24,3 +24,4 @@ def test_intensity(RE, hw):
     assert dc.start[0]["plan_name"] == "run_intensity"
     assert dc.start[0]["shape"] == (5, 3)
     assert dc.start[0]["motors"] == ["w1", "w1_crystal_1"]
+    assert dc.start[0]["hints"]["dimensions"] == [(["w1"], "primary"), (["w1_crystal_1"], "primary")]
