@@ -5,6 +5,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [2022.6.0]
+
+### Fixed
+- ordering of tuning plan metadata for motors and dimensions
+
 ## [2022.5.0]
 
 ### Fixed
@@ -24,7 +29,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 - initial release
 
 
-[Unreleased]: https://github.com/wright-group/wright-plans/compare/v2022.5.0...HEAD
+[Unreleased]: https://github.com/wright-group/wright-plans/compare/v2022.6.0...HEAD
+[2022.6.0]: https://github.com/wright-group/wright-plans/compare/v2022.5.0...v2022.6.0
 [2022.5.0]: https://github.com/wright-group/wright-plans/compare/v2022.4.0...v2022.5.0
 [2022.4.0]: https://github.com/wright-group/wright-plans/compare/v2021.9.0...v2022.4.0
 [2021.9.0]: https://github.com/wright-group/wright-plans/releases/tag/v2021.9.0
