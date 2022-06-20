@@ -8,6 +8,7 @@ from ._messages import set_relative_to_func_wrapper
 from ._plans import scan_nd_wp
 from ._units import ureg
 
+
 def _spectrometer_md(spectrometer):
     if spectrometer is None:
         return None
@@ -15,6 +16,7 @@ def _spectrometer_md(spectrometer):
     if spectrometer_md.get("device"):
         spectrometer_md["device"] = repr(spectrometer["device"])
     return spectrometer_md
+
 
 def motortune(detectors, opa, use_tune_points, motors, spectrometer=None, *, md=None):
     cyc = 1
@@ -51,7 +53,11 @@ def motortune(detectors, opa, use_tune_points, motors, spectrometer=None, *, md=
 
                     return _motor_rel_inner
 
-                relative_sets[getattr(opa, mot)] = {"func": _motor_rel(opa, mot), "native": "", "differential": ""}
+                relative_sets[getattr(opa, mot)] = {
+                    "func": _motor_rel(opa, mot),
+                    "native": "",
+                    "differential": "",
+                }
 
             pts = np.linspace(
                 params["center"] - params["width"] / 2,
@@ -63,7 +69,11 @@ def motortune(detectors, opa, use_tune_points, motors, spectrometer=None, *, md=
             pattern_args.extend([repr(getattr(opa, mot)), pts])
     if spectrometer and spectrometer["device"]:
         if spectrometer["method"] == "static":
-            center = ureg.Quantity(spectrometer["center"], spectrometer.get("units", "nm")).to("nm").magnitude
+            center = (
+                ureg.Quantity(spectrometer["center"], spectrometer.get("units", "nm"))
+                .to("nm")
+                .magnitude
+            )
             yield Msg("set", spectrometer["device"], center, group="motortune_prep")
         elif spectrometer["method"] == "zero":
             yield Msg("set", spectrometer["device"], 0, group="motortune_prep")
@@ -75,7 +85,13 @@ def motortune(detectors, opa, use_tune_points, motors, spectrometer=None, *, md=
                     "nm", [ConstantTerm(1, opa)]
                 )
             else:
-                center = ureg.Quantity(spectrometer["center"], spectrometer.get("units", "nm")).to("nm").magnitude
+                center = (
+                    ureg.Quantity(
+                        spectrometer["center"], spectrometer.get("units", "nm")
+                    )
+                    .to("nm")
+                    .magnitude
+                )
                 yield Msg("set", spectrometer["device"], center, group="motortune_prep")
         elif spectrometer["method"] == "scan":
             if use_tune_points:
@@ -87,7 +103,11 @@ def motortune(detectors, opa, use_tune_points, motors, spectrometer=None, *, md=
 
                     return _spec_rel_inner
 
-                relative_sets[spectrometer["device"]] = {"func": _spec_rel(opa), "native": "nm", "differential": spectrometer.get("units", "nm")}
+                relative_sets[spectrometer["device"]] = {
+                    "func": _spec_rel(opa),
+                    "native": "nm",
+                    "differential": spectrometer.get("units", "nm"),
+                }
             pts = np.linspace(
                 spectrometer["center"] - spectrometer["width"] / 2,
                 spectrometer["center"] + spectrometer["width"] / 2,
@@ -100,7 +120,9 @@ def motortune(detectors, opa, use_tune_points, motors, spectrometer=None, *, md=
             pattern_args.extend([repr(spectrometer["device"]), pts])
 
     yield Msg("wait", None, "motortune_prep")
-    scanned_motors = [m.name if hasattr(m, "name") else getattr(opa, m).name for m in scanned_motors]
+    scanned_motors = [
+        m.name if hasattr(m, "name") else getattr(opa, m).name for m in scanned_motors
+    ]
     local_md = {
         "plan_name": "motortune",
         "plan_args": {
@@ -120,7 +142,7 @@ def motortune(detectors, opa, use_tune_points, motors, spectrometer=None, *, md=
     md = local_md | md
     md["hints"].setdefault("gridding", "rectilinear")
     try:
-        md['hints'].setdefault('dimensions', [([m], 'primary') for m in scanned_motors])
+        md["hints"].setdefault("dimensions", [([m], "primary") for m in scanned_motors])
     except (AttributeError, KeyError):
         ...
     plan = scan_nd_wp(detectors, cyc, axis_units=axis_units, constants=constants, md=md)
@@ -172,7 +194,13 @@ def run_holistic(detectors, opa, motor0, motor1, width, npts, spectrometer, *, m
             "npts": npts,
             "spectrometer": _spectrometer_md(spectrometer),
         },
-        "hints": {"gridding": "rectilinear", "dimensions":[([f"{opa.name}_{motor0}"], "primary"), ([f"{opa.name}_{motor1}"], "primary")]},
+        "hints": {
+            "gridding": "rectilinear",
+            "dimensions": [
+                ([f"{opa.name}_{motor0}"], "primary"),
+                ([f"{opa.name}_{motor1}"], "primary"),
+            ],
+        },
         "motors": [f"{opa.name}_{motor0}", f"{opa.name}_{motor1}"],
     }
     return (
@@ -251,4 +279,6 @@ def run_tune_test(detectors, opa, spectrometer, *, md=None):
         },
         "hints": {},
     }
-    return (yield from motortune(detectors, opa, True, {}, spectrometer, md=local_md | md))
+    return (
+        yield from motortune(detectors, opa, True, {}, spectrometer, md=local_md | md)
+    )
