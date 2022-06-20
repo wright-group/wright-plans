@@ -33,6 +33,7 @@ def motortune(detectors, opa, use_tune_points, motors, spectrometer=None, *, md=
         instr = attune.Instrument(**opa.yaq_client.get_instrument())
         arrangement = opa.yaq_client.get_arrangement()
         tune_points = get_tune_points(instr, instr[arrangement], scanned_motors)
+        scanned_motors = [opa] + scanned_motors
         cyc = cycler(opa, tune_points)
         axis_units[opa] = "nm"  # TODO more robust units?
         shape.append(len(tune_points))
@@ -92,6 +93,7 @@ def motortune(detectors, opa, use_tune_points, motors, spectrometer=None, *, md=
                 spectrometer["center"] + spectrometer["width"] / 2,
                 spectrometer["npts"],
             )
+            scanned_motors += [spectrometer["device"]]
             cyc *= cycler(spectrometer["device"], pts)
             axis_units[spectrometer["device"]] = spectrometer.get("units", "nm")
             shape.append(spectrometer["npts"])
@@ -112,6 +114,7 @@ def motortune(detectors, opa, use_tune_points, motors, spectrometer=None, *, md=
         "plan_pattern_module": "bluesky.plan_patterns",
         "plan_pattern_args": {"args": pattern_args},
         "hints": {},
+        "motors": [m.name if hasattr(m, "name") else getattr(opa, m).name for m in scanned_motors],
     }
     md = local_md | md
     md["hints"].setdefault("gridding", "rectilinear")

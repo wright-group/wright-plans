@@ -23,4 +23,4 @@ def test_holistic(RE, hw):
 
     assert dc.start[0]["plan_name"] == "run_holistic"
     assert dc.start[0]["shape"] == (5, 3)
-    assert set(dc.start[0]["motors"]) == {"w1_delay_1", "w1_crystal_1"}
+    assert dc.start[0]["motors"] == ["w1_crystal_1", "w1_delay_1"]

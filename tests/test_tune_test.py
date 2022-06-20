@@ -21,4 +21,4 @@ def test_tune_test(RE, hw):
 
     assert dc.start[0]["plan_name"] == "run_tune_test"
     assert dc.start[0]["shape"] == (5, 3)
-    assert set(dc.start[0]["motors"]) == {"w1", "wm"}
+    assert dc.start[0]["motors"] == ["w1", "wm"]
