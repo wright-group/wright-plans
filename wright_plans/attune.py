@@ -136,6 +136,7 @@ def motortune(detectors, opa, use_tune_points, motors, spectrometer=None, *, md=
         "plan_pattern": "outer_list_product",
         "plan_pattern_module": "bluesky.plan_patterns",
         "plan_pattern_args": {"args": pattern_args},
+        "plan_axis_units": {k.name: v for k, v in axis_units.items()},
         "hints": {},
         "motors": scanned_motors,
     }
@@ -145,6 +146,12 @@ def motortune(detectors, opa, use_tune_points, motors, spectrometer=None, *, md=
         md["hints"].setdefault("dimensions", [([m], "primary") for m in scanned_motors])
     except (AttributeError, KeyError):
         ...
+
+    # relative sets handles unit behavior
+    for key in relative_sets:
+        if key in axis_units:
+            del axis_units[key]
+
     plan = scan_nd_wp(detectors, cyc, axis_units=axis_units, constants=constants, md=md)
     if relative_sets:
         plan = set_relative_to_func_wrapper(plan, relative_sets)
