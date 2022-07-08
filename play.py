@@ -8,15 +8,15 @@ from bluesky.callbacks.best_effort import BestEffortCallback
 
 from wright_plans._constants import Constant, ConstantTerm
 
-from wright_plans.attune import motortune, run_intensity
+from wright_plans.attune import motortune, run_tune_test
 from wright_plans._messages import register_set_except
 
 
 #from bluesky_autonomic import OPADevice
 
-#import databroker
+import databroker
 
-#cat = databroker.catalog["mongo"]
+cat = databroker.catalog["mongo"]
 
 
 bec = BestEffortCallback()
@@ -30,8 +30,7 @@ opa = yaqc_bluesky.Device(39301)
 
 RE = bluesky.RunEngine({})
 RE.subscribe(bec)
-#RE.subscribe(cat.v1.insert)
+RE.subscribe(cat.v1.insert)
 register_set_except(RE)
 
-RE(run_intensity([daq], opa, "crystal_1", width=1, npts=3, spectrometer={"device": wm, "method": "track"}))
-RE(run_intensity([daq, wm], opa, "crystal_1", width=1, npts=3, spectrometer={"device": wm, "method": "zero"}))
+RE(run_tune_test([daq], opa, spectrometer={"device": wm, "method": "scan", "units": "wn", "width": -250, "npts": 11}))
