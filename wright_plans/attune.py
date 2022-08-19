@@ -244,7 +244,7 @@ def run_intensity(detectors, opa, motor, width, npts, spectrometer, *, md=None):
             True,
             {motor: {"method": "scan", "width": width, "npts": npts}},
             spectrometer,
-            md=local_md | md,
+            md=local_md or md,
         )
     )
 
