@@ -9,6 +9,7 @@ __all__ = [
     "grid_scan_wp",
     "rel_grid_scan_wp",
     "scan_nd_wp",
+    "grid_scan",
 ]
 
 from graphlib import TopologicalSorter
@@ -299,3 +300,27 @@ def scan_nd_wp(
     _md.update(md or {})
     per_step = make_one_nd_step(constants, axis_units, per_step)
     yield from bsp.scan_nd(detectors, cycler, per_step=per_step, md=_md)
+
+
+def grid_scan(
+    detectors, *args, snake_axes=False, per_step=None, md=None
+):
+    nargs = 5
+    axis_units = _axis_units_from_args(args, nargs)
+    md_args = [repr(i) if isinstance(i, Movable) else i for i in args]
+    _md = {
+        "plan_name": "grid_scan",
+        "plan_args": {
+            "detectors": list(map(repr, detectors)),
+            "args": md_args,
+            "per_step": repr(per_step),
+        },
+        "plan_axis_units": {k.name: v for k, v in axis_units.items()},
+    }
+    _md.update(md or {})
+    print(_md)
+    per_step = bluesky.plan_stubs.one_nd_step
+    args = [x for i, x in enumerate(args) if not i % nargs == nargs - 1]
+    yield from bsp.grid_scan(
+        detectors, *args, snake_axes=snake_axes, per_step=per_step, md=_md
+    )
