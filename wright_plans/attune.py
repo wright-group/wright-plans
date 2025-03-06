@@ -18,7 +18,7 @@ def _spectrometer_md(spectrometer):
     return spectrometer_md
 
 
-def motortune(detectors, opa, use_tune_points, motors, spectrometer=None, *, md=None):
+def motortune(detectors, *args, opa, use_tune_points, motors, spectrometer=None, md=None):
     cyc = 1
     md = md or {}
     relative_sets = {}
@@ -188,7 +188,7 @@ def get_tune_points(instrument, arrangement, scanned_motors):
     return unique[diff > tol]
 
 
-def run_holistic(detectors, opa, motor0, motor1, width, npts, spectrometer, *, md=None):
+def run_holistic(detectors, *args, opa, motor0, motor1, width, npts, spectrometer, md=None):
     md = md or {}
     local_md = {
         "plan_name": "run_holistic",
@@ -213,6 +213,7 @@ def run_holistic(detectors, opa, motor0, motor1, width, npts, spectrometer, *, m
     return (
         yield from motortune(
             detectors,
+            None,
             opa,
             True,
             {motor1: {"method": "scan", "width": width, "npts": npts}},
@@ -222,7 +223,7 @@ def run_holistic(detectors, opa, motor0, motor1, width, npts, spectrometer, *, m
     )
 
 
-def run_intensity(detectors, opa, motor, width, npts, spectrometer, *, md=None):
+def run_intensity(detectors, *args, opa, motor, width, npts, spectrometer, md=None):
     assert not spectrometer or spectrometer["method"] in ("none", "track", "zero")
     md = md or {}
     local_md = {
@@ -240,6 +241,7 @@ def run_intensity(detectors, opa, motor, width, npts, spectrometer, *, md=None):
     return (
         yield from motortune(
             detectors,
+            None,
             opa,
             True,
             {motor: {"method": "scan", "width": width, "npts": npts}},
@@ -249,7 +251,7 @@ def run_intensity(detectors, opa, motor, width, npts, spectrometer, *, md=None):
     )
 
 
-def run_setpoint(detectors, opa, motor, width, npts, spectrometer, *, md=None):
+def run_setpoint(detectors, *args, opa, motor, width, npts, spectrometer, md=None):
     md = md or {}
     local_md = {
         "plan_name": "run_setpoint",
@@ -266,6 +268,7 @@ def run_setpoint(detectors, opa, motor, width, npts, spectrometer, *, md=None):
     return (
         yield from motortune(
             detectors,
+            None,
             opa,
             True,
             {motor: {"method": "scan", "width": width, "npts": npts}},
@@ -275,7 +278,7 @@ def run_setpoint(detectors, opa, motor, width, npts, spectrometer, *, md=None):
     )
 
 
-def run_tune_test(detectors, opa, spectrometer, *, md=None):
+def run_tune_test(detectors, *args, opa, spectrometer, md=None):
     md = md or {}
     local_md = {
         "plan_name": "run_tune_test",
@@ -287,5 +290,5 @@ def run_tune_test(detectors, opa, spectrometer, *, md=None):
         "hints": {},
     }
     return (
-        yield from motortune(detectors, opa, True, {}, spectrometer, md=local_md | md)
+        yield from motortune(detectors, None, opa, True, {}, spectrometer, md=local_md | md)
     )
